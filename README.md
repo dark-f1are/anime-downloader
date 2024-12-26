@@ -59,7 +59,7 @@ This tool is for educational purposes. Respect copyright laws and the rights of 
 ## 👤 Author
 
 **Dark Flare**
-- GitHub: [@abrar-wadud](https://github.com/dark-f1are)
+- GitHub: [@dark-f1are](https://github.com/dark-f1are)
 
 ## 📝 License
 
