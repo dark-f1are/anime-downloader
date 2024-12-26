@@ -58,8 +58,8 @@ This tool is for educational purposes. Respect copyright laws and the rights of 
 
 ## 👤 Author
 
-**Abrar Wadud**
-- GitHub: [@abrar-wadud](https://github.com/abrar-wadud)
+**Dark Flare**
+- GitHub: [@abrar-wadud](https://github.com/dark-f1are)
 
 ## 📝 License
 
