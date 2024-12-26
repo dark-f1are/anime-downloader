@@ -13,7 +13,7 @@ A simple web application to search and download anime episodes with multiple res
 
 ## 🚀 Live Demo
 
-Check out the live application: [Anime Downloader](https://abrar-wadud.github.io/anime-downloader/)
+Check out the live application: [Anime Downloader](https://dark-f1are.github.io/anime-downloader/)
 
 ## 📦 Technologies Used
 
@@ -27,7 +27,7 @@ Check out the live application: [Anime Downloader](https://abrar-wadud.github.io
 
 1. Clone the repository
 ```bash
-git clone https://github.com/abrar-wadud/anime-downloader.git
+git clone https://github.com/dark-f1are/anime-downloader.git
 ```
 
 2. Open `index.html` in your web browser
