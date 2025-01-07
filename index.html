@@ -15,7 +15,10 @@
         <form id="animeForm" autocomplete="off">
             <section class="form-group">
                 <label for="animeSearch">Search Anime</label>
-                <input type="text" id="animeSearch" name="animeSearch" placeholder="Search for an anime">
+                <div class="search-container">
+                    <input type="text" id="animeSearch" name="animeSearch" placeholder="Search for an anime">
+                    <button type="button" id="searchBtn" class="search-btn">Search</button>
+                </div>
                 <div id="selectedAnime" class="selected-anime hidden">
                     <div id="selectedAnimeContent" class="selected-anime-content">
                         <img id="selectedAnimeImage" src="" alt="Selected Anime">
@@ -28,13 +31,17 @@
                 </div>                
                 <div id="searchResults" class="search-results hidden"></div>
             </section>
-            <section class="form-group">
-                <label for="startEpisode">Start Episode</label>
-                <input type="number" id="startEpisode" name="startEpisode" placeholder="Start episode number" required min="1">
-            </section>
-            <section class="form-group">
-                <label for="endEpisode">End Episode</label>
-                <input type="number" id="endEpisode" name="endEpisode" placeholder="End episode number" required min="1">
+            <section class="form-group episode-range">
+                <label>Episode Range</label>
+                <div class="input-row">
+                    <div class="input-group">
+                        <input type="number" id="startEpisode" name="startEpisode" placeholder="Start" required min="1">
+                    </div>
+                    <span class="separator">-</span>
+                    <div class="input-group">
+                        <input type="number" id="endEpisode" name="endEpisode" placeholder="End" required min="1">
+                    </div>
+                </div>
             </section>
             <section class="form-group">
                 <label for="resolution">Select Resolution</label>
@@ -46,7 +53,10 @@
                 </select>
             </section>            
             <div id="errorContainer" class="error-container"></div>
-            <button type="submit" class="btn">Get Links</button>
+            <div class="button-group">
+                <button type="button" id="getLinksBtn" class="btn">Get Links</button>
+                <button type="button" id="downloadAllBtn" class="btn">Download All</button>
+            </div>
         </form>
         <div id="loading" class="hidden">
             <p>Loading...</p>

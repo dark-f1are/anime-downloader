@@ -1,66 +1,67 @@
 # Anime Downloader 🎬
 
-A simple web application to search and download anime episodes with multiple resolution options.
+A modern web application for searching and downloading anime episodes. Features a clean dark theme interface and supports multiple video resolutions.
 
-## ⭐ Features
+## ✨ Key Features
 
-- Search anime by title
-- View anime details (title, year, episode count)
-- Select download range for episodes
-- Choose preferred video resolution (1080p, 720p, 480p, 360p)
-- Progressive episode download
-- Responsive dark-themed UI
+- 🔍 Quick anime search with button trigger
+- 🖼️ Rich anime details with cover images
+- 📺 Episode range selection
+- 🎥 Multiple resolution options (1080p to 360p)
+- 📥 Batch download capability
+- 🌗 Dark theme UI
+- 📱 Responsive design
+- 🔄 Progress tracking for downloads
+- ⚡ Concurrent request handling
 
-## 🚀 Live Demo
+## 🎮 Usage Guide
 
-Check out the live application: [Anime Downloader](https://dark-f1are.github.io/anime-downloader/)
+1. **Search for Anime**
+   - Type the anime title in the search box
+   - Click the search button or press Enter
+   - Click on a result to select the anime
 
-## 📦 Technologies Used
+2. **Configure Download**
+   - Set the episode range (start and end)
+   - Choose your preferred video quality
+   - Select either:
+     - "Get Links" for individual episode links
+     - "Download All" for batch downloading
 
-- HTML5
-- CSS3
-- JavaScript (Vanilla)
-- Anitaku API for anime search and metadata
-- Custom proxy for download link extraction
+3. **Download Options**
+   - Individual episodes: Click on episode links
+   - Batch download: Links open in new tabs automatically
 
-## 🛠 Installation
+## 🛠️ Technical Details
 
-1. Clone the repository
-```bash
-git clone https://github.com/dark-f1are/anime-downloader.git
-```
+- Built with vanilla JavaScript - no frameworks
+- Uses modern ES6+ features
+- Implements efficient request handling
+- Includes error handling and user feedback
+- Responsive CSS with CSS variables
+- Cross-browser compatible
 
-2. Open `index.html` in your web browser
+## ⚠️ Notes
 
-## 🤔 How to Use
+- Requires a modern browser with JavaScript enabled
+- Some features may require CORS handling
+- Downloads depend on server availability
+- For personal use only - respect copyright laws
 
-1. Enter an anime title in the search bar
-2. Select an anime from the search results
-3. Specify start and end episode numbers
-4. Choose your preferred resolution
-5. Click "Download" to fetch episode links
+## 🤝 Contributing
 
-## 🌈 Highlights
-
-- Debounced search functionality
-- Episode download progress indicator
-- Error handling for various scenarios
-- Clean, modern dark-themed design
-
-## 📋 Requirements
-
-- Modern web browser with JavaScript enabled
-- Internet connection
-
-## 🔒 Disclaimer
-
-This tool is for educational purposes. Respect copyright laws and the rights of content creators.
+1. Fork the repository
+2. Create your feature branch
+3. Commit your changes
+4. Push to the branch
+5. Open a Pull Request
 
 ## 👤 Author
 
 **Dark Flare**
 - GitHub: [@dark-f1are](https://github.com/dark-f1are)
+- Live Demo: [Anime Downloader](https://dark-f1are.github.io/anime-downloader/)
 
-## 📝 License
+---
 
-[MIT License](https://opensource.org/licenses/MIT)
+⭐ Star this repo if you find it helpful!

@@ -338,3 +338,76 @@ option {
     background-color: var(--main-bg-color);
     color: var(--text-color);
 }
+
+/* Button group styling */
+/* Success message */
+.success-message {
+    background-color: #4CAF50;
+    color: white;
+    padding: 15px;
+    border-radius: 4px;
+    text-align: center;
+    margin-top: 10px;
+}
+
+.button-group {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.button-group .btn {
+    flex: 1;
+    margin-bottom: 0;
+}
+
+/* New input row styling */
+.input-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.input-group {
+    flex: 1;
+}
+
+.separator {
+    color: var(--text-color);
+    font-weight: bold;
+    padding: 0 5px;
+}
+
+.episode-range input[type="number"] {
+    text-align: center;
+}
+
+/* Adjust the existing input styling to work with the new layout */
+.input-group input[type="number"] {
+    width: 100%;
+}
+
+.search-container {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 10px;
+}
+
+.search-container input[type="text"] {
+    flex: 1;
+}
+
+.search-btn {
+    padding: 10px 20px;
+    background-color: var(--btn-bg-color);
+    color: var(--text-color);
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background-color 0.3s;
+}
+
+.search-btn:hover {
+    background-color: var(--btn-bg-hover-color);
+}

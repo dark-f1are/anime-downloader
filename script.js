@@ -3,33 +3,36 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('searchResults').classList.add('hidden');
 });
 
-document.getElementById('animeForm').addEventListener('submit', event => {
-    event.preventDefault();
-    handleFetchDownloadLinks();
+// Remove the form submit event listener and add button click listeners
+document.getElementById('animeForm').removeEventListener('submit', handleFetchDownloadLinks);
+
+document.getElementById('getLinksBtn').addEventListener('click', () => {
+    handleFetchDownloadLinks('single');
 });
 
-// Function to clear the selected anime display
-function clearSelectedAnime() {
-    const selectedAnime = document.getElementById('selectedAnime');
-    selectedAnime.classList.add('hidden');
-}
+document.getElementById('downloadAllBtn').addEventListener('click', () => {
+    handleFetchDownloadLinks('multi');
+});
 
-let debounceTimeout;
-// Event listener for the search input
-document.getElementById('animeSearch').addEventListener('input', () => {
-    clearTimeout(debounceTimeout);
-    debounceTimeout = setTimeout(() => {
-        const query = document.getElementById('animeSearch').value.trim();
-        if (query.length > 0) {
-            clearSelectedAnime(); // Clear previous selection when a new search starts
-            searchAnime(query);
-            document.getElementById('searchResults').classList.remove('hidden');
-        } else {
-            document.getElementById('searchResults').innerHTML = '';
-            document.getElementById('searchResults').classList.add('hidden');
-            clearSelectedAnime(); // Clear selection when search query is empty
-        }
-    }, 750); // 750ms delay
+// Remove the debounce code and add button click handler
+document.getElementById('searchBtn').addEventListener('click', () => {
+    const query = document.getElementById('animeSearch').value.trim();
+    if (query.length > 0) {
+        clearSelectedAnime(); // Clear previous selection when a new search starts
+        searchAnime(query);
+        document.getElementById('searchResults').classList.remove('hidden');
+    } else {
+        document.getElementById('searchResults').innerHTML = '';
+        document.getElementById('searchResults').classList.add('hidden');
+        clearSelectedAnime(); // Clear selection when search query is empty
+    }
+});
+
+// Also add Enter key support for the search input
+document.getElementById('animeSearch').addEventListener('keyup', (event) => {
+    if (event.key === 'Enter') {
+        document.getElementById('searchBtn').click();
+    }
 });
 
 function showSelectedAnime(title, year, imgSrc, episodeCount) {
@@ -47,6 +50,16 @@ function showSelectedAnime(title, year, imgSrc, episodeCount) {
 }
 
 let selectedAnimeUrl = '';
+
+// Add this function near the top of the file
+function clearSelectedAnime() {
+    const selectedAnime = document.getElementById('selectedAnime');
+    selectedAnime.classList.add('hidden');
+    document.getElementById('selectedAnimeImage').src = '';
+    document.getElementById('selectedAnimeTitle').textContent = '';
+    document.getElementById('selectedAnimeYear').textContent = '';
+    document.getElementById('selectedepisodeCount').textContent = '';
+}
 
 // Function to handle search and update search results
 async function searchAnime(query) {
@@ -192,7 +205,7 @@ function validateEpisodeNumbers(startEpisode, endEpisode) {
     return true;
 }
 
-async function handleFetchDownloadLinks() {
+async function handleFetchDownloadLinks(mode) {
     const startEpisode = parseInt(document.getElementById('startEpisode').value);
     const endEpisode = parseInt(document.getElementById('endEpisode').value);
     const preferredResolution = document.getElementById('resolution').value + 'P';
@@ -214,7 +227,21 @@ async function handleFetchDownloadLinks() {
 
     try {
         const episodeOptions = await fetchDownloadLinks(selectedAnimeUrl, startEpisode, endEpisode, preferredResolution);
-        displayEpisodeList(episodeOptions);
+        
+        if (mode === 'single') {
+            displayEpisodeList(episodeOptions);
+        } else if (mode === 'multi') {
+            // Open all download links in new tabs
+            episodeOptions.forEach(episode => {
+                if (episode.downloadLink) {
+                    window.open(episode.downloadLink, '_blank');
+                }
+            });
+            // Show a brief success message
+            const episodeList = document.getElementById('episodeList');
+            episodeList.innerHTML = '<div class="success-message">All download links have been opened in new tabs.</div>';
+            episodeList.classList.remove('hidden');
+        }
     } catch (error) {
         console.error('Error:', error);
         showError('An error occurred while fetching episode links. Please try again later.');
