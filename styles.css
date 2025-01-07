@@ -302,7 +302,7 @@ select:focus {
 
 .episode-item:not(.clicked) a:hover {
     background: rgba(255, 255, 255, 0.05);
-    transform: translateX(5px);
+    transform: none; /* Remove the transform */
 }
 
 .episode-resolution {
@@ -401,28 +401,30 @@ select:focus {
 
 .selected-anime-content {
     display: flex;
-    flex-direction: column;
-    align-items: center;
+    flex-direction: row; /* Changed from column to row */
+    align-items: flex-start; /* Changed from center */
     gap: var(--spacing-lg);
+    padding: var(--spacing-md);
 }
 
 .selected-anime img {
-    width: 180px;
-    height: 250px;
+    width: 120px; /* Reduced from 180px */
+    height: 170px; /* Reduced from 250px */
     object-fit: cover;
     border-radius: var(--border-radius-md);
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
     margin: 0;
+    flex-shrink: 0; /* Prevent image from shrinking */
 }
 
 #selectedAnimeInfo {
-    text-align: center;
-    max-width: 100%;
+    text-align: left; /* Changed from center */
+    flex: 1;
+    min-width: 0; /* Prevent text overflow */
 }
 
 #selectedAnimeTitle {
-    font-size: 24px;
-    margin: 0 0 var(--spacing-sm);
+    font-size: 20px; /* Reduced from 24px */
     background: linear-gradient(135deg, #60a5fa, #3b82f6);
     -webkit-background-clip: text;
     background-clip: text;
@@ -475,6 +477,7 @@ input[type=number] {
 /* Style the select dropdown */
 select {
     width: 100%;
+    cursor: pointer;
     padding: var(--spacing-md);
     border: 1px solid var(--border-color);
     border-radius: var(--border-radius-sm);
@@ -583,5 +586,22 @@ option {
     to {
         opacity: 1;
         transform: translateY(0);
+    }
+}
+
+/* Update mobile responsiveness */
+@media screen and (max-width: 480px) {
+    .selected-anime-content {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .selected-anime img {
+        width: 140px;
+        height: 200px;
+    }
+
+    #selectedAnimeInfo {
+        text-align: center;
     }
 }
