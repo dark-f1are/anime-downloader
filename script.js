@@ -1,39 +1,60 @@
+// State management
+const state = {
+    selectedAnimeUrl: '',
+    currentSearch: null
+};
+
+// DOM Elements
+const DOM = {
+    init() {
+        this.episodeList = document.getElementById('episodeList');
+        this.searchResults = document.getElementById('searchResults');
+        this.selectedAnime = document.getElementById('selectedAnime');
+        this.searchInput = document.getElementById('animeSearch');
+        this.progressBar = document.getElementById('progressBar');
+        this.loading = document.getElementById('loading');
+        this.errorContainer = document.getElementById('errorContainer');
+    }
+};
+
+// Event Handlers
 document.addEventListener('DOMContentLoaded', () => {
-    document.getElementById('episodeList').classList.add('hidden');
-    document.getElementById('searchResults').classList.add('hidden');
+    DOM.init();
+    initializeUI();
+    setupEventListeners();
 });
 
-// Remove the form submit event listener and add button click listeners
-document.getElementById('animeForm').removeEventListener('submit', handleFetchDownloadLinks);
+function initializeUI() {
+    DOM.episodeList.classList.add('hidden');
+    DOM.searchResults.classList.add('hidden');
+}
 
-document.getElementById('getLinksBtn').addEventListener('click', () => {
-    handleFetchDownloadLinks('single');
-});
+function setupEventListeners() {
+    // Button event listeners
+    document.getElementById('getLinksBtn').addEventListener('click', () => handleFetchDownloadLinks('single'));
+    document.getElementById('downloadAllBtn').addEventListener('click', () => handleFetchDownloadLinks('multi'));
+    document.getElementById('searchBtn').addEventListener('click', handleSearch);
 
-document.getElementById('downloadAllBtn').addEventListener('click', () => {
-    handleFetchDownloadLinks('multi');
-});
+    // Search input enter key support
+    DOM.searchInput.addEventListener('keyup', (event) => {
+        if (event.key === 'Enter') {
+            document.getElementById('searchBtn').click();
+        }
+    });
+}
 
-// Remove the debounce code and add button click handler
-document.getElementById('searchBtn').addEventListener('click', () => {
-    const query = document.getElementById('animeSearch').value.trim();
+async function handleSearch() {
+    const query = DOM.searchInput.value.trim();
     if (query.length > 0) {
-        clearSelectedAnime(); // Clear previous selection when a new search starts
-        searchAnime(query);
-        document.getElementById('searchResults').classList.remove('hidden');
+        clearSelectedAnime();
+        await searchAnime(query);
+        DOM.searchResults.classList.remove('hidden');
     } else {
-        document.getElementById('searchResults').innerHTML = '';
-        document.getElementById('searchResults').classList.add('hidden');
-        clearSelectedAnime(); // Clear selection when search query is empty
+        DOM.searchResults.innerHTML = '';
+        DOM.searchResults.classList.add('hidden');
+        clearSelectedAnime();
     }
-});
-
-// Also add Enter key support for the search input
-document.getElementById('animeSearch').addEventListener('keyup', (event) => {
-    if (event.key === 'Enter') {
-        document.getElementById('searchBtn').click();
-    }
-});
+}
 
 function showSelectedAnime(title, year, imgSrc, episodeCount) {
     const selectedAnimeTitle = document.getElementById('selectedAnimeTitle');
@@ -48,8 +69,6 @@ function showSelectedAnime(title, year, imgSrc, episodeCount) {
     selectedAnimeImage.src = imgSrc;
     selectedAnime.classList.remove('hidden');
 }
-
-let selectedAnimeUrl = '';
 
 // Add this function near the top of the file
 function clearSelectedAnime() {
@@ -121,7 +140,7 @@ async function searchAnime(query) {
                 resultItem.addEventListener('click', function() {
                     const { title, year, imgSrc, episodeCount } = this.dataset;
                     showSelectedAnime(title, year, imgSrc, episodeCount);
-                    selectedAnimeUrl = this.dataset.url;
+                    state.selectedAnimeUrl = this.dataset.url;
                     searchResultsContainer.innerHTML = '';
                     searchResultsContainer.classList.add('hidden');
                 });
@@ -217,16 +236,16 @@ async function handleFetchDownloadLinks(mode) {
         return;
     }
 
-    if (!selectedAnimeUrl) {
+    if (!state.selectedAnimeUrl) {
         showError('Please select an anime from the search results.');
         return;
     }
 
-    document.getElementById('loading').classList.remove('hidden');
-    document.getElementById('episodeList').innerHTML = '';
+    DOM.loading.classList.remove('hidden');
+    DOM.episodeList.innerHTML = '';
 
     try {
-        const episodeOptions = await fetchDownloadLinks(selectedAnimeUrl, startEpisode, endEpisode, preferredResolution);
+        const episodeOptions = await fetchDownloadLinks(state.selectedAnimeUrl, startEpisode, endEpisode, preferredResolution);
         
         if (mode === 'single') {
             displayEpisodeList(episodeOptions);
@@ -246,7 +265,7 @@ async function handleFetchDownloadLinks(mode) {
         console.error('Error:', error);
         showError('An error occurred while fetching episode links. Please try again later.');
     } finally {
-        document.getElementById('loading').classList.add('hidden');
+        DOM.loading.classList.add('hidden');
     }
 }
 
@@ -305,9 +324,9 @@ async function fetchDownloadLinks(animeUrl, startEpisode, endEpisode, preferredR
 }
 
 // Function to update the progress bar
-function updateProgressBar(fetchedEpisodes, totalEpisodes, progressBar) {
+function updateProgressBar(fetchedEpisodes, totalEpisodes) {
     const progressPercentage = (fetchedEpisodes / totalEpisodes) * 100;
-    progressBar.style.width = `${progressPercentage}%`;
+    DOM.progressBar.style.width = `${progressPercentage}%`;
 }
 
 async function scrapeEpisodePage(url, episodeTitle, episodeNumber, preferredResolution) {
@@ -441,4 +460,15 @@ async function changeUrlFormat(animeUrl, startEpisode, endEpisode) {
         console.error("Error in changeUrlFormat:", error);
         return [];
     }
+}
+
+// Export for testing if needed
+if (typeof module !== 'undefined') {
+    module.exports = {
+        state,
+        DOM,
+        handleSearch,
+        showError,
+        updateProgressBar
+    };
 }

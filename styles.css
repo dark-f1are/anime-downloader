@@ -1,11 +1,24 @@
 :root {
+    /* Colors */
     --main-bg-color: #000000;
     --text-color: #ffffff;
     --border-color: #303030;
     --btn-bg-color: #1976d2;
     --btn-bg-hover-color: #1565c0;
-    --loader-border-color: #3498db;
-    --clicked-item-color: #909090;
+    --error-bg-color: #ffdddd;
+    --error-text-color: #d8000c;
+    --success-bg-color: #4CAF50;
+    
+    /* Spacing */
+    --spacing-sm: 5px;
+    --spacing-md: 10px;
+    --spacing-lg: 15px;
+    --spacing-xl: 20px;
+    
+    /* Border radius */
+    --border-radius-sm: 4px;
+    --border-radius-md: 8px;
+    --border-radius-lg: 12px;
 }
 
 body {
@@ -21,7 +34,7 @@ body {
     max-width: 400px;
     margin: 30px auto;
     padding: 30px;
-    border-radius: 10px;
+    border-radius: var(--border-radius-lg);
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     background-color: var(--main-bg-color);
     color: var(--text-color);
@@ -35,23 +48,23 @@ header h1 {
 }
 
 .form-group {
-    margin-bottom: 15px;
+    margin-bottom: var(--spacing-lg);
 }
 
 label {
     display: block;
     font-size: 14px;
     color: var(--text-color);
-    margin-bottom: 5px;
+    margin-bottom: var(--spacing-sm);
 }
 
 input[type="url"],
 input[type="number"],
 input[type="text"] {
     width: 100%;
-    padding: 10px;
+    padding: var(--spacing-md);
     border: 1px solid var(--border-color);
-    border-radius: 4px;
+    border-radius: var(--border-radius-sm);
     box-sizing: border-box;
     font-size: 16px;
     color: var(--text-color);
@@ -60,15 +73,15 @@ input[type="text"] {
 
 .btn {
     width: 100%;
-    padding: 10px;
+    padding: var(--spacing-md);
     background-color: var(--btn-bg-color);
     color: var(--text-color);
     border: none;
-    border-radius: 4px;
+    border-radius: var(--border-radius-sm);
     cursor: pointer;
     font-size: 16px;
     transition: background-color 0.3s;
-    margin-bottom: 20px;
+    margin-bottom: var(--spacing-xl);
 }
 
 .btn:hover {
@@ -78,7 +91,7 @@ input[type="text"] {
 /* Loading Animation */
 .loading {
     text-align: center;
-    padding: 20px;
+    padding: var(--spacing-xl);
 }
 #loading p {
     margin-top: 0;
@@ -87,7 +100,7 @@ input[type="text"] {
     display: flex;
     justify-content: center;
     align-items: center;
-    gap: 10px;
+    gap: var(--spacing-md);
 }
 
 .bouncing-dots div {
@@ -121,7 +134,7 @@ input[type="text"] {
 .loading p {
     color: var(--text-color);
     font-size: 16px;
-    margin-top: 10px;
+    margin-top: var(--spacing-md);
 }
 
 .hidden {
@@ -133,18 +146,18 @@ input[type="text"] {
 }
 
 .episode-item {
-    margin-bottom: 12px;
+    margin-bottom: var(--spacing-md);
 }
 
 .episode-item a {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 10px;
+    padding: var(--spacing-md);
     background-color: var(--border-color);
     color: var(--text-color);
     text-decoration: none;
-    border-radius: 4px;
+    border-radius: var(--border-radius-sm);
     transition: background-color 0.3s;
 }
 
@@ -163,25 +176,25 @@ input[type="text"] {
 }
 
 .error-container {
-    margin-bottom: 20px;
+    margin-bottom: var(--spacing-xl);
 }
 
 .error-item {
-    background-color: #ffdddd;
-    color: #d8000c;
-    padding: 10px;
-    border: 1px solid #d8000c;
-    border-radius: 4px;
-    margin-bottom: 10px;
+    background-color: var(--error-bg-color);
+    color: var(--error-text-color);
+    padding: var(--spacing-md);
+    border: 1px solid var(--error-text-color);
+    border-radius: var(--border-radius-sm);
+    margin-bottom: var(--spacing-md);
 }
 
 /* Search results container */
 .search-results {
     overflow-y: auto;
-    margin-top: 15px;
+    margin-top: var(--spacing-lg);
     border: 2px solid var(--border-color);
-    border-radius: 12px;
-    padding: 7px;
+    border-radius: var(--border-radius-lg);
+    padding: var(--spacing-sm);
     background-color: var(--main-bg-color);
 }
 
@@ -189,9 +202,9 @@ input[type="text"] {
 .result-item {
     display: flex;
     align-items: center;
-    padding: 7px;
-    margin-bottom: 15px;
-    border-radius: 10px;
+    padding: var(--spacing-sm);
+    margin-bottom: var(--spacing-lg);
+    border-radius: var(--border-radius-md);
     transition: background-color 0.3s, transform 0.3s, box-shadow 0.3s;
     cursor: pointer; /* Indicates that the item is clickable */
 }
@@ -206,9 +219,9 @@ input[type="text"] {
 .result-img img {
     width: 100px;
     height: 140px;
-    border-radius: 8px;
+    border-radius: var(--border-radius-md);
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-    margin-right: 15px;
+    margin-right: var(--spacing-lg);
 }
 
 /* Text info styling */
@@ -225,7 +238,7 @@ input[type="text"] {
 }
 
 .result-info p {
-    margin: 5px 0;
+    margin: var(--spacing-sm) 0;
     font-size: 14px;
     color: var(--text-color);
     font-style: italic;
@@ -236,7 +249,7 @@ input[type="text"] {
 }
 
 .selected-anime {
-    margin-top: 20px;
+    margin-top: var(--spacing-xl);
 }
 
 .selected-anime-content {
@@ -247,8 +260,8 @@ input[type="text"] {
 .selected-anime img {
     max-width: 120px;
     max-height: 180px;
-    border-radius: 8px;
-    margin-right: 20px;
+    border-radius: var(--border-radius-md);
+    margin-right: var(--spacing-xl);
 }
 
 #selectedAnimeInfo {
@@ -263,14 +276,14 @@ input[type="text"] {
 }
 
 #selectedAnimeYear {
-    margin: 5px 0;
+    margin: var(--spacing-sm) 0;
     font-size: 15px;
     color: var(--text-color);
     font-style: italic;
 }
 
 #selectedepisodeCount {
-    margin: 5px 0;
+    margin: var(--spacing-sm) 0;
     font-size: 15px;
     color: var(--text-color);
     font-style: italic;
@@ -281,8 +294,8 @@ input[type="text"] {
     width: 100%;
     height: 10px;
     background-color: #444444;
-    border-radius: 5px;
-    margin-top: 10px;
+    border-radius: var(--border-radius-sm);
+    margin-top: var(--spacing-md);
     overflow: hidden;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
@@ -292,7 +305,7 @@ input[type="text"] {
     height: 100%;
     background: linear-gradient(90deg, #040466ff, #041676ff, #042986ff, #043C97ff, #044EA7ff, #0461B7ff, #0473C7ff);
     transition: width 0.4s ease;
-    border-radius: 5px;
+    border-radius: var(--border-radius-sm);
 }
 
 /* Hide the number input spinner arrows in all browsers */
@@ -313,9 +326,9 @@ input[type=number] {
 /* Style the select dropdown */
 select {
     width: 100%;
-    padding: 10px;
+    padding: var(--spacing-md);
     border: 1px solid var(--border-color);
-    border-radius: 4px;
+    border-radius: var(--border-radius-sm);
     box-sizing: border-box;
     font-size: 16px;
     color: var(--text-color);
@@ -325,7 +338,7 @@ select {
     -moz-appearance: none; /* Vendor prefix for Firefox */
     background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%27http%3A//www.w3.org/2000/svg%27%20viewBox%3D%270%200%204%205%27%3E%3Cpath%20fill%3D%27%23ffffff%27%20d%3D%27M2%200l2%202H0z%27/%3E%3C/svg%3E');
     background-repeat: no-repeat;
-    background-position: right 10px center;
+    background-position: right var(--spacing-md) center;
     background-size: 8px 10px;
 }
 
@@ -342,18 +355,18 @@ option {
 /* Button group styling */
 /* Success message */
 .success-message {
-    background-color: #4CAF50;
+    background-color: var(--success-bg-color);
     color: white;
-    padding: 15px;
-    border-radius: 4px;
+    padding: var(--spacing-xl);
+    border-radius: var(--border-radius-sm);
     text-align: center;
-    margin-top: 10px;
+    margin-top: var(--spacing-md);
 }
 
 .button-group {
     display: flex;
-    gap: 10px;
-    margin-bottom: 20px;
+    gap: var(--spacing-md);
+    margin-bottom: var(--spacing-xl);
 }
 
 .button-group .btn {
@@ -365,7 +378,7 @@ option {
 .input-row {
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: var(--spacing-md);
 }
 
 .input-group {
@@ -375,7 +388,7 @@ option {
 .separator {
     color: var(--text-color);
     font-weight: bold;
-    padding: 0 5px;
+    padding: 0 var(--spacing-sm);
 }
 
 .episode-range input[type="number"] {
@@ -389,8 +402,8 @@ option {
 
 .search-container {
     display: flex;
-    gap: 10px;
-    margin-bottom: 10px;
+    gap: var(--spacing-md);
+    margin-bottom: var(--spacing-md);
 }
 
 .search-container input[type="text"] {
@@ -398,11 +411,11 @@ option {
 }
 
 .search-btn {
-    padding: 10px 20px;
+    padding: var(--spacing-md) var(--spacing-xl);
     background-color: var(--btn-bg-color);
     color: var(--text-color);
     border: none;
-    border-radius: 4px;
+    border-radius: var(--border-radius-sm);
     cursor: pointer;
     font-size: 16px;
     transition: background-color 0.3s;
