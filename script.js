@@ -438,7 +438,7 @@ async function scrapeEpisodePage(url, episodeTitle, episodeNumber, preferredReso
         }
 
         // Step 3: Fetch the final download links using the extracted `id`
-        const postResponse = await fetch("https://crossorigin.me/https://s3embtaku.pro/download", {
+        const postResponse = await fetch("https://web-production-af65.up.railway.app/https://s3embtaku.pro/download", {
             method: "POST",
             headers: {
                 "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
