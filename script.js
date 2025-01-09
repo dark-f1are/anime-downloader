@@ -42,6 +42,7 @@ function setupEventListeners() {
     document.getElementById('getLinksBtn').addEventListener('click', () => handleFetchDownloadLinks('single'));
     document.getElementById('downloadAllBtn').addEventListener('click', () => handleFetchDownloadLinks('multi'));
     document.getElementById('searchBtn').addEventListener('click', handleSearch);
+    document.getElementById('exportLinksBtn').addEventListener('click', handleExportLinks);
 
     // Search input enter key support
     DOM.searchInput.addEventListener('keyup', (event) => {
@@ -130,9 +131,10 @@ function disableButtons() {
     DOM.searchBtn.disabled = true;
     DOM.getLinksBtn.disabled = true;
     DOM.downloadAllBtn.disabled = true;
+    document.getElementById('exportLinksBtn').disabled = true;
     
     // Add loading state styles
-    [DOM.searchBtn, DOM.getLinksBtn, DOM.downloadAllBtn].forEach(btn => {
+    [DOM.searchBtn, DOM.getLinksBtn, DOM.downloadAllBtn, document.getElementById('exportLinksBtn')].forEach(btn => {
         btn.style.opacity = '0.7';
         btn.style.cursor = 'not-allowed';
     });
@@ -143,9 +145,10 @@ function enableButtons() {
     DOM.searchBtn.disabled = false;
     DOM.getLinksBtn.disabled = false;
     DOM.downloadAllBtn.disabled = false;
+    document.getElementById('exportLinksBtn').disabled = false;
     
     // Remove loading state styles
-    [DOM.searchBtn, DOM.getLinksBtn, DOM.downloadAllBtn].forEach(btn => {
+    [DOM.searchBtn, DOM.getLinksBtn, DOM.downloadAllBtn, document.getElementById('exportLinksBtn')].forEach(btn => {
         btn.style.opacity = '1';
         btn.style.cursor = 'pointer';
     });
@@ -547,6 +550,42 @@ async function changeUrlFormat(animeUrl, startEpisode, endEpisode) {
         console.error("Error in changeUrlFormat:", error);
         return [];
     }
+}
+
+async function handleExportLinks() {
+    const episodeList = document.getElementById('episodeList');
+    if (!episodeList.children.length) {
+        showError('Please fetch episode links first before exporting.');
+        return;
+    }
+
+    // Get the selected anime title
+    const animeTitle = document.getElementById('selectedAnimeTitle').textContent;
+    const resolution = document.getElementById('resolution').value;
+    
+    // Create content for the text file
+    let content = `${animeTitle} - ${resolution}p Download Links\n`;
+    content += '='.repeat(50) + '\n\n';
+    
+    // Get all episode items
+    const episodes = Array.from(episodeList.getElementsByClassName('episode-item'));
+    episodes.forEach(episode => {
+        const link = episode.querySelector('a');
+        const title = link.childNodes[0].textContent.trim();
+        const downloadLink = link.href;
+        content += `${title}\n${downloadLink}\n\n`;
+    });
+
+    // Create blob and download
+    const blob = new Blob([content], { type: 'text/plain' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${animeTitle} - ${resolution}p Links.txt`;
+    document.body.appendChild(a);
+    a.click();
+    window.URL.revokeObjectURL(url);
+    document.body.removeChild(a);
 }
 
 // Export for testing if needed

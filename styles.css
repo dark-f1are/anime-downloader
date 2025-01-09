@@ -92,6 +92,7 @@ body {
 
     .button-group .btn {
         margin-bottom: var(--spacing-md);
+        width: 100%;
     }
 
     /* Adjust search container for mobile */
