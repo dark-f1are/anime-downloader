@@ -25,6 +25,90 @@ const DOM = {
     }
 };
 
+// Add cache management near the top of the file
+const cache = {
+    searchResults: new Map(),
+    downloadLinks: new Map(),
+    
+    // Cache expiration time (24 hours)
+    CACHE_DURATION: 24 * 60 * 60 * 1000,
+
+    set(key, value, type = 'searchResults') {
+        if (!value) return; // Don't cache null/undefined values
+        
+        const data = {
+            timestamp: Date.now(),
+            value: value
+        };
+        
+        try {
+            // Store in memory
+            this[type].set(key, data);
+            
+            // Store in localStorage
+            const storageKey = `${type}_${key}`;
+            localStorage.setItem(storageKey, JSON.stringify(data));
+        } catch (e) {
+            console.warn('Cache storage failed:', e);
+            this.clearOldCache();
+        }
+    },
+
+    get(key, type = 'searchResults') {
+        try {
+            // Try memory cache first
+            let data = this[type].get(key);
+            
+            // If not in memory, try localStorage
+            if (!data) {
+                const storageKey = `${type}_${key}`;
+                const storedData = localStorage.getItem(storageKey);
+                if (storedData) {
+                    data = JSON.parse(storedData);
+                    // Restore to memory cache
+                    this[type].set(key, data);
+                }
+            }
+
+            if (!data) return null;
+
+            // Check if cache is expired
+            if (Date.now() - data.timestamp > this.CACHE_DURATION) {
+                this.delete(key, type);
+                return null;
+            }
+
+            return data.value;
+        } catch (e) {
+            console.warn('Cache retrieval failed:', e);
+            return null;
+        }
+    },
+
+    delete(key, type = 'searchResults') {
+        this[type].delete(key);
+        const storageKey = `${type}_${key}`;
+        localStorage.removeItem(storageKey);
+    },
+
+    clearOldCache() {
+        // Clear old items from localStorage
+        const now = Date.now();
+        for (let i = 0; i < localStorage.length; i++) {
+            const key = localStorage.key(i);
+            try {
+                const data = JSON.parse(localStorage.getItem(key));
+                if (now - data.timestamp > this.CACHE_DURATION) {
+                    localStorage.removeItem(key);
+                }
+            } catch (e) {
+                // Invalid cache item, remove it
+                localStorage.removeItem(key);
+            }
+        }
+    }
+};
+
 // Event Handlers
 document.addEventListener('DOMContentLoaded', () => {
     DOM.init();
@@ -156,6 +240,13 @@ function enableButtons() {
 
 // Function to handle search and update search results
 async function searchAnime(query) {
+    // Check cache first
+    const cachedResults = cache.get(query);
+    if (cachedResults) {
+        updateSearchResults(cachedResults);
+        return;
+    }
+
     const searchUrl = `https://anitaku.bz/search.html?keyword=${encodeURIComponent(query)}`;
     const searchResultsContainer = document.getElementById('searchResults');
 
@@ -178,56 +269,80 @@ async function searchAnime(query) {
         const doc = new DOMParser().parseFromString(html, 'text/html');
         const items = doc.querySelectorAll('.items li');
 
-        searchResultsContainer.innerHTML = '';
-
         if (items.length === 0) {
             searchResultsContainer.innerHTML = '<p>No results found.</p>';
-        } else {
-            items.forEach(async item => {
-                const titleElement = item.querySelector('.name a');
-                const title = titleElement.textContent.trim();
-                const url = titleElement.getAttribute('href');
-                const imgSrc = item.querySelector('.img img').getAttribute('src');
-                const releasedYear = item.querySelector('.released').textContent.trim();
-
-                // Fetch additional information about episodes
-                const episodeCount = await fetchEpisodeCount(`https://anitaku.bz${url}`);
-
-                const resultItem = document.createElement('div');
-                resultItem.classList.add('result-item');
-                resultItem.dataset.url = `https://anitaku.bz${url}`;
-                resultItem.dataset.title = title;
-                resultItem.dataset.year = releasedYear;
-                resultItem.dataset.imgSrc = imgSrc;
-                resultItem.dataset.episodeCount = episodeCount; // Store episode count
-                resultItem.innerHTML = `
-                    <div class="result-img">
-                        <img src="${imgSrc}" alt="${title}" loading="lazy"> <!-- Lazy loading enabled -->
-                    </div>
-                    <div class="result-info">
-                        <h3>${title}</h3>
-                        <p>${releasedYear}</p>
-                        <p>${episodeCount} ${episodeCount === 1 ? 'Episode' : 'Episodes'}</p>
-                    </div>
-                `;
-
-                resultItem.addEventListener('click', function() {
-                    const { title, year, imgSrc, episodeCount } = this.dataset;
-                    showSelectedAnime(title, year, imgSrc, episodeCount);
-                    state.selectedAnimeUrl = this.dataset.url;
-                    searchResultsContainer.innerHTML = '';
-                    searchResultsContainer.classList.add('hidden');
-                });
-
-                searchResultsContainer.appendChild(resultItem);
-            });
+            return;
         }
+
+        // Use Promise.all to handle all async operations
+        const results = await Promise.all(Array.from(items).map(async item => {
+            const titleElement = item.querySelector('.name a');
+            const title = titleElement.textContent.trim();
+            const url = `https://anitaku.bz${titleElement.getAttribute('href')}`;
+            const imgSrc = item.querySelector('.img img').getAttribute('src');
+            const releasedYear = item.querySelector('.released').textContent.trim();
+            
+            // Fetch episode count
+            const episodeCount = await fetchEpisodeCount(url);
+
+            return {
+                title,
+                url,
+                imgSrc,
+                releasedYear,
+                episodeCount
+            };
+        }));
+
+        // Cache the results only after all episode counts are fetched
+        cache.set(query, results);
+        updateSearchResults(results);
+
     } catch (error) {
         console.error('Error:', error);
         searchResultsContainer.innerHTML = '<p>An error occurred while searching. Please try again later.</p>';
-    } finally {
-        searchResultsContainer.classList.remove('hidden');
     }
+}
+
+function updateSearchResults(results) {
+    const searchResultsContainer = document.getElementById('searchResults');
+    searchResultsContainer.innerHTML = '';
+
+    if (!results || results.length === 0) {
+        searchResultsContainer.innerHTML = '<p>No results found.</p>';
+        return;
+    }
+
+    results.forEach(result => {
+        const resultItem = document.createElement('div');
+        resultItem.classList.add('result-item');
+        resultItem.dataset.url = result.url;
+        resultItem.dataset.title = result.title;
+        resultItem.dataset.year = result.releasedYear;
+        resultItem.dataset.imgSrc = result.imgSrc;
+        resultItem.dataset.episodeCount = result.episodeCount;
+
+        resultItem.innerHTML = `
+            <div class="result-img">
+                <img src="${result.imgSrc}" alt="${result.title}" loading="lazy">
+            </div>
+            <div class="result-info">
+                <h3>${result.title}</h3>
+                <p>${result.releasedYear}</p>
+                <p>${result.episodeCount} ${result.episodeCount === 1 ? 'Episode' : 'Episodes'}</p>
+            </div>
+        `;
+
+        resultItem.addEventListener('click', function() {
+            const { title, year, imgSrc, episodeCount } = this.dataset;
+            showSelectedAnime(title, year, imgSrc, episodeCount);
+            state.selectedAnimeUrl = this.dataset.url;
+            searchResultsContainer.innerHTML = '';
+            searchResultsContainer.classList.add('hidden');
+        });
+
+        searchResultsContainer.appendChild(resultItem);
+    });
 }
 
 async function fetchEpisodeCount(animeUrl) {
@@ -366,6 +481,14 @@ function showError(message) {
 }
 
 async function fetchDownloadLinks(animeUrl, startEpisode, endEpisode, preferredResolution) {
+    const cacheKey = `${animeUrl}_${startEpisode}_${endEpisode}_${preferredResolution}`;
+    
+    // Check cache first
+    const cachedLinks = cache.get(cacheKey, 'downloadLinks');
+    if (cachedLinks) {
+        return cachedLinks;
+    }
+
     const episodeOptions = [];
     const concurrentRequests = 5;
     const queue = [];
@@ -408,6 +531,8 @@ async function fetchDownloadLinks(animeUrl, startEpisode, endEpisode, preferredR
     // Hide progress bar when done
     progressContainer.classList.add('hidden');
 
+    // Cache the results before returning
+    cache.set(cacheKey, episodeOptions, 'downloadLinks');
     return episodeOptions;
 }
 
@@ -552,6 +677,7 @@ async function changeUrlFormat(animeUrl, startEpisode, endEpisode) {
     }
 }
 
+// Simplify handleExportLinks function
 async function handleExportLinks() {
     const episodeList = document.getElementById('episodeList');
     if (!episodeList.children.length) {
@@ -559,29 +685,19 @@ async function handleExportLinks() {
         return;
     }
 
-    // Get the selected anime title
-    const animeTitle = document.getElementById('selectedAnimeTitle').textContent;
-    const resolution = document.getElementById('resolution').value;
-    
-    // Create content for the text file
-    let content = `${animeTitle} - ${resolution}p Download Links\n`;
-    content += '='.repeat(50) + '\n\n';
-    
-    // Get all episode items
+    let content = '';
     const episodes = Array.from(episodeList.getElementsByClassName('episode-item'));
     episodes.forEach(episode => {
         const link = episode.querySelector('a');
-        const title = link.childNodes[0].textContent.trim();
-        const downloadLink = link.href;
-        content += `${title}\n${downloadLink}\n\n`;
+        content += `${link.href}\n`;
     });
 
-    // Create blob and download
+    // Create and trigger download
     const blob = new Blob([content], { type: 'text/plain' });
     const url = window.URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `${animeTitle} - ${resolution}p Links.txt`;
+    a.download = 'download_links.txt';
     document.body.appendChild(a);
     a.click();
     window.URL.revokeObjectURL(url);
