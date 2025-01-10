@@ -688,8 +688,8 @@ async function handleExportLinks() {
     let content = '';
     const episodes = Array.from(episodeList.getElementsByClassName('episode-item'));
     episodes.forEach(episode => {
-        const link = episode.querySelector('a');
-        content += `${link.href}\n`;
+        const link = episode.querySelector('a').href;
+        content += `${link}\n`;
     });
 
     // Create and trigger download
