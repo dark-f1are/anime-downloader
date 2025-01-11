@@ -29,22 +29,31 @@ const DOM = {
 const cache = {
     searchResults: new Map(),
     downloadLinks: new Map(),
-    
+
     // Cache expiration time (24 hours)
     CACHE_DURATION: 24 * 60 * 60 * 1000,
 
     set(key, value, type = 'searchResults') {
-        if (!value) return; // Don't cache null/undefined values
-        
+        // Don't cache null, undefined, or empty array values
+        if (!value || (Array.isArray(value) && value.length === 0)) {
+            return;
+        }
+
+        // For downloadLinks, verify that they contain valid download links
+        if (type === 'downloadLinks') {
+            const hasValidLinks = value.some(item => item.downloadLink !== null);
+            if (!hasValidLinks) return;
+        }
+
         const data = {
             timestamp: Date.now(),
             value: value
         };
-        
+
         try {
             // Store in memory
             this[type].set(key, data);
-            
+
             // Store in localStorage
             const storageKey = `${type}_${key}`;
             localStorage.setItem(storageKey, JSON.stringify(data));
@@ -58,7 +67,7 @@ const cache = {
         try {
             // Try memory cache first
             let data = this[type].get(key);
-            
+
             // If not in memory, try localStorage
             if (!data) {
                 const storageKey = `${type}_${key}`;
@@ -72,8 +81,8 @@ const cache = {
 
             if (!data) return null;
 
-            // Check if cache is expired
-            if (Date.now() - data.timestamp > this.CACHE_DURATION) {
+            // Validate cache data
+            if (!this.isValidCache(data, type)) {
                 this.delete(key, type);
                 return null;
             }
@@ -83,6 +92,29 @@ const cache = {
             console.warn('Cache retrieval failed:', e);
             return null;
         }
+    },
+
+    isValidCache(data, type) {
+        // Check if cache is expired
+        if (Date.now() - data.timestamp > this.CACHE_DURATION) {
+            return false;
+        }
+
+        // Validate data structure
+        if (!data.value) return false;
+
+        // Type-specific validation
+        if (type === 'searchResults') {
+            return Array.isArray(data.value) && data.value.length > 0;
+        }
+
+        if (type === 'downloadLinks') {
+            return Array.isArray(data.value) && 
+                   data.value.length > 0 && 
+                   data.value.some(item => item.downloadLink !== null);
+        }
+
+        return true;
     },
 
     delete(key, type = 'searchResults') {
@@ -158,10 +190,10 @@ async function handleSearch() {
     DOM.episodeList.innerHTML = '';
     DOM.episodeList.classList.add('hidden');
     DOM.errorContainer.innerHTML = '';
-    
+
     // Show loading state
     disableButtons();
-    
+
     try {
         await searchAnime(query);
         DOM.searchResults.classList.remove('hidden');
@@ -178,7 +210,7 @@ function showSelectedAnime(title, year, imgSrc, episodeCount) {
     const selectedAnimeImage = document.getElementById('selectedAnimeImage');
     const selectedAnime = document.getElementById('selectedAnime');
     const selectedepisodeCount = document.getElementById('selectedepisodeCount')
-    
+
     selectedAnimeTitle.textContent = title;
     selectedepisodeCount.textContent = `${episodeCount} ${episodeCount === 1 ? 'Episode' : 'Episodes'}`;
     selectedAnimeYear.textContent = `${year}`;
@@ -216,7 +248,7 @@ function disableButtons() {
     DOM.getLinksBtn.disabled = true;
     DOM.downloadAllBtn.disabled = true;
     document.getElementById('exportLinksBtn').disabled = true;
-    
+
     // Add loading state styles
     [DOM.searchBtn, DOM.getLinksBtn, DOM.downloadAllBtn, document.getElementById('exportLinksBtn')].forEach(btn => {
         btn.style.opacity = '0.7';
@@ -230,7 +262,7 @@ function enableButtons() {
     DOM.getLinksBtn.disabled = false;
     DOM.downloadAllBtn.disabled = false;
     document.getElementById('exportLinksBtn').disabled = false;
-    
+
     // Remove loading state styles
     [DOM.searchBtn, DOM.getLinksBtn, DOM.downloadAllBtn, document.getElementById('exportLinksBtn')].forEach(btn => {
         btn.style.opacity = '1';
@@ -242,7 +274,7 @@ function enableButtons() {
 async function searchAnime(query) {
     // Check cache first
     const cachedResults = cache.get(query);
-    if (cachedResults) {
+    if (cachedResults && cachedResults.length > 0) {
         updateSearchResults(cachedResults);
         return;
     }
@@ -281,7 +313,7 @@ async function searchAnime(query) {
             const url = `https://anitaku.bz${titleElement.getAttribute('href')}`;
             const imgSrc = item.querySelector('.img img').getAttribute('src');
             const releasedYear = item.querySelector('.released').textContent.trim();
-            
+
             // Fetch episode count
             const episodeCount = await fetchEpisodeCount(url);
 
@@ -333,7 +365,7 @@ function updateSearchResults(results) {
             </div>
         `;
 
-        resultItem.addEventListener('click', function() {
+        resultItem.addEventListener('click', function () {
             const { title, year, imgSrc, episodeCount } = this.dataset;
             showSelectedAnime(title, year, imgSrc, episodeCount);
             state.selectedAnimeUrl = this.dataset.url;
@@ -437,7 +469,7 @@ async function handleFetchDownloadLinks(mode) {
 
     try {
         const episodeOptions = await fetchDownloadLinks(state.selectedAnimeUrl, startEpisode, endEpisode, preferredResolution);
-        
+
         if (mode === 'single') {
             displayEpisodeList(episodeOptions);
         } else if (mode === 'multi') {
@@ -460,7 +492,7 @@ function handleMultiDownload(episodeOptions) {
             successCount++;
         }
     });
-    
+
     // Show success message with count
     const episodeList = document.getElementById('episodeList');
     episodeList.innerHTML = `
@@ -482,10 +514,10 @@ function showError(message) {
 
 async function fetchDownloadLinks(animeUrl, startEpisode, endEpisode, preferredResolution) {
     const cacheKey = `${animeUrl}_${startEpisode}_${endEpisode}_${preferredResolution}`;
-    
+
     // Check cache first
     const cachedLinks = cache.get(cacheKey, 'downloadLinks');
-    if (cachedLinks) {
+    if (cachedLinks && cachedLinks.some(link => link.downloadLink !== null)) {
         return cachedLinks;
     }
 
@@ -549,11 +581,11 @@ async function scrapeEpisodePage(url, episodeTitle, episodeNumber, preferredReso
         // Step 1: Fetch the initial download page link
         const response = await fetch(url);
         if (!response.ok) throw new Error(`Failed to retrieve the webpage. Status code: ${response.status}`);
-        
+
         const html = await response.text();
         const doc = new DOMParser().parseFromString(html, 'text/html');
         const downloadPageLink = doc.querySelector('.favorites_book a[href^="http"]')?.getAttribute('href');
-        
+
         if (!downloadPageLink) {
             return { title: episodeTitle, downloadLink: null, episodeNumber };
         }
@@ -576,10 +608,10 @@ async function scrapeEpisodePage(url, episodeTitle, episodeNumber, preferredReso
         });
 
         if (!postResponse.ok) throw new Error(`Failed to fetch download links. Status code: ${postResponse.status}`);
-        
+
         const postHtml = await postResponse.text();
         const postDoc = new DOMParser().parseFromString(postHtml, 'text/html');
-        
+
         // Step 4: Extract download links and prioritize the preferred resolution
         const resolutionOrder = ['1080P', '720P', '480P', '360P']; // Highest to lowest preference
         const availableLinks = Array.from(postDoc.querySelectorAll('.dowload a[href^="http"]')).map(link => {
@@ -594,7 +626,7 @@ async function scrapeEpisodePage(url, episodeTitle, episodeNumber, preferredReso
         let selectedLink = availableLinks.find(link => link.resolution === preferredResolution);
         if (!selectedLink) {
             for (const fallback of resolutionOrder) {
-                selectedLink = availableLinks.find(link => link.resolution === fallback);
+                selectedLink = availableLinks.find(link.resolution === fallback);
                 if (selectedLink) break;
             }
         }
@@ -604,11 +636,11 @@ async function scrapeEpisodePage(url, episodeTitle, episodeNumber, preferredReso
         }
 
         // Step 5: Return the download link for the selected resolution
-        return { 
-            title: episodeTitle, 
-            downloadLink: selectedLink.downloadLink, 
-            resolution: selectedLink.resolution, 
-            episodeNumber 
+        return {
+            title: episodeTitle,
+            downloadLink: selectedLink.downloadLink,
+            resolution: selectedLink.resolution,
+            episodeNumber
         };
 
     } catch (error) {
@@ -631,7 +663,7 @@ function displayEpisodeList(episodeOptions) {
             </a>
         `;
         fragment.appendChild(episodeItem);
-        episodeItem.addEventListener('click', function() {
+        episodeItem.addEventListener('click', function () {
             episodeItem.classList.add('clicked');
         });
     });
