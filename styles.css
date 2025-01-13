@@ -134,6 +134,12 @@ body {
     #selectedAnimeTitle {
         font-size: 20px;
     }
+
+    .button-group {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: var(--spacing-md);
+    }
 }
 
 /* Additional adjustment for very small screens */
@@ -513,7 +519,15 @@ option {
     padding: var(--spacing-xl);
     border-radius: var(--border-radius-sm);
     text-align: center;
-    margin-top: var(--spacing-md);
+    margin-bottom: var(--spacing-md);
+    animation: fadeInOut 2s ease-in-out;
+}
+
+@keyframes fadeInOut {
+    0% { opacity: 0; transform: translateY(-10px); }
+    10% { opacity: 1; transform: translateY(0); }
+    90% { opacity: 1; transform: translateY(0); }
+    100% { opacity: 0; transform: translateY(-10px); }
 }
 
 .button-group {
@@ -604,5 +618,9 @@ option {
 
     #selectedAnimeInfo {
         text-align: center;
+    }
+
+    .button-group {
+        grid-template-columns: 1fr;
     }
 }

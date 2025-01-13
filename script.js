@@ -159,6 +159,7 @@ function setupEventListeners() {
     document.getElementById('downloadAllBtn').addEventListener('click', () => handleFetchDownloadLinks('multi'));
     document.getElementById('searchBtn').addEventListener('click', handleSearch);
     document.getElementById('exportLinksBtn').addEventListener('click', handleExportLinks);
+    document.getElementById('copyLinksBtn').addEventListener('click', handleCopyLinks);
 
     // Search input enter key support
     DOM.searchInput.addEventListener('keyup', (event) => {
@@ -248,9 +249,12 @@ function disableButtons() {
     DOM.getLinksBtn.disabled = true;
     DOM.downloadAllBtn.disabled = true;
     document.getElementById('exportLinksBtn').disabled = true;
+    document.getElementById('copyLinksBtn').disabled = true;
 
     // Add loading state styles
-    [DOM.searchBtn, DOM.getLinksBtn, DOM.downloadAllBtn, document.getElementById('exportLinksBtn')].forEach(btn => {
+    [DOM.searchBtn, DOM.getLinksBtn, DOM.downloadAllBtn, 
+     document.getElementById('exportLinksBtn'),
+     document.getElementById('copyLinksBtn')].forEach(btn => {
         btn.style.opacity = '0.7';
         btn.style.cursor = 'not-allowed';
     });
@@ -262,9 +266,12 @@ function enableButtons() {
     DOM.getLinksBtn.disabled = false;
     DOM.downloadAllBtn.disabled = false;
     document.getElementById('exportLinksBtn').disabled = false;
+    document.getElementById('copyLinksBtn').disabled = false;
 
     // Remove loading state styles
-    [DOM.searchBtn, DOM.getLinksBtn, DOM.downloadAllBtn, document.getElementById('exportLinksBtn')].forEach(btn => {
+    [DOM.searchBtn, DOM.getLinksBtn, DOM.downloadAllBtn, 
+     document.getElementById('exportLinksBtn'),
+     document.getElementById('copyLinksBtn')].forEach(btn => {
         btn.style.opacity = '1';
         btn.style.cursor = 'pointer';
     });
@@ -734,6 +741,39 @@ async function handleExportLinks() {
     a.click();
     window.URL.revokeObjectURL(url);
     document.body.removeChild(a);
+}
+
+// Add new function to handle copying links
+async function handleCopyLinks() {
+    const episodeList = document.getElementById('episodeList');
+    if (!episodeList.children.length) {
+        showError('Please fetch episode links first before copying.');
+        return;
+    }
+
+    let content = '';
+    const episodes = Array.from(episodeList.getElementsByClassName('episode-item'));
+    episodes.forEach(episode => {
+        const link = episode.querySelector('a').href;
+        content += `${link}\n`;
+    });
+
+    try {
+        await navigator.clipboard.writeText(content);
+        
+        // Show success message
+        const successMessage = document.createElement('div');
+        successMessage.classList.add('success-message');
+        successMessage.textContent = 'Links copied to clipboard!';
+        
+        // Remove the message after 2 seconds
+        episodeList.insertBefore(successMessage, episodeList.firstChild);
+        setTimeout(() => {
+            successMessage.remove();
+        }, 2000);
+    } catch (err) {
+        showError('Failed to copy links. Please try again.');
+    }
 }
 
 // Export for testing if needed

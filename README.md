@@ -8,7 +8,9 @@ A modern web application for searching and downloading anime episodes. Features 
 - 🖼️ Rich anime details with cover images
 - 📺 Episode range selection
 - 🎥 Multiple resolution options (1080p to 360p)
+- 📋 Copy all download links to clipboard
 - 📥 Batch download capability
+- 📁 Export links to text file
 - 🌗 Dark theme UI
 - 📱 Responsive design
 - 🔄 Progress tracking for downloads
@@ -24,13 +26,17 @@ A modern web application for searching and downloading anime episodes. Features 
 2. **Configure Download**
    - Set the episode range (start and end)
    - Choose your preferred video quality
-   - Select either:
+   - Select one of the following options:
      - "Get Links" for individual episode links
      - "Download All" for batch downloading
+     - "Copy Links" to copy all links to clipboard
+     - "Export Links" to save links to a text file
 
 3. **Download Options**
    - Individual episodes: Click on episode links
    - Batch download: Links open in new tabs automatically
+   - Copy links: Paste links into external downloader
+   - Export: Use the text file with download managers
 
 ## 🛠️ Technical Details
 
@@ -40,6 +46,10 @@ A modern web application for searching and downloading anime episodes. Features 
 - Includes error handling and user feedback
 - Responsive CSS with CSS variables
 - Cross-browser compatible
+
+## ⚠️ Important Notice
+
+**Note:** Episodes of any anime released after **November 24, 2024** will not be available for download through this tool. Please check for updates or alternative sources for newer episodes.
 
 ## ⚠️ Notes
 
