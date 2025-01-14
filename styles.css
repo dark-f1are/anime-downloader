@@ -654,23 +654,46 @@ option {
 
 /* Add these new styles */
 .proxy-status-container {
+    position: relative;
     margin-bottom: var(--spacing-lg);
     padding: var(--spacing-md);
     border-radius: var(--border-radius-sm);
     background: rgba(255, 255, 255, 0.05);
+    text-align: center;
+}
+
+.proxy-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.8);
+    z-index: 1000;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+}
+
+.proxy-checking-message {
+    color: var(--text-color);
+    font-size: 1.2rem;
+    margin-bottom: var(--spacing-xl);
+    text-align: center;
 }
 
 .proxy-status {
     display: flex;
     align-items: center;
+    justify-content: center;
     gap: var(--spacing-md);
 }
 
 .status-dot {
-    width: 10px;
-    height: 10px;
+    width: 12px;
+    height: 12px;
     border-radius: 50%;
-    transition: background-color 0.3s ease;
 }
 
 .status-dot.checking {
@@ -682,13 +705,13 @@ option {
     background-color: #22c55e;
 }
 
-.status-dot.offline {
-    background-color: #ef4444;
+.status-text {
+    font-size: 1.1rem;
+    color: var(--text-color);
 }
 
-.status-text {
-    font-size: 14px;
-    color: var(--text-color);
+.status-dot.offline {
+    background-color: #ef4444;
 }
 
 .retry-proxy-btn {

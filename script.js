@@ -192,42 +192,28 @@ function setupEventListeners() {
 }
 
 function setupProxyStatus() {
-    const proxyContainer = document.createElement('div');
-    proxyContainer.classList.add('proxy-status-container');
-    proxyContainer.innerHTML = `
-        <div id="proxyStatusIndicator" class="proxy-status">
-            <span class="status-dot"></span>
-            <span class="status-text">Checking proxy status...</span>
-            <button class="retry-proxy-btn hidden">Retry</button>
+    const overlay = document.createElement('div');
+    overlay.classList.add('proxy-overlay');
+    overlay.innerHTML = `
+        <div class="proxy-checking-message">
+            <div class="proxy-status">
+                <span class="status-dot checking"></span>
+                <span class="status-text">Initializing proxy server...</span>
+            </div>
+        </div>
+        <div class="bouncing-dots">
+            <div></div>
+            <div></div>
+            <div></div>
         </div>
     `;
+    document.body.appendChild(overlay);
 
-    // Insert before the search form
-    const searchForm = document.getElementById('animeForm');
-    searchForm.parentNode.insertBefore(proxyContainer, searchForm);
-
-    // Add retry button handler
-    const retryBtn = proxyContainer.querySelector('.retry-proxy-btn');
-    retryBtn.addEventListener('click', () => {
-        retryBtn.classList.add('hidden');
-        checkProxyStatus();
-    });
-
-    // Initial check only
-    checkProxyStatus();
+    // Initial check
+    checkProxyStatus(overlay);
 }
 
-async function checkProxyStatus() {
-    const statusDot = document.querySelector('.status-dot');
-    const statusText = document.querySelector('.status-text');
-    const retryBtn = document.querySelector('.retry-proxy-btn');
-
-    if (state.proxyStatus.isChecking) return;
-    state.proxyStatus.isChecking = true;
-
-    statusDot.className = 'status-dot checking';
-    statusText.textContent = 'Checking proxy status...';
-    
+async function checkProxyStatus(overlay) {
     try {
         const testUrl = 'https://s3embtaku.pro/download';
         const response = await fetch(state.currentProxy + testUrl, { 
@@ -236,21 +222,16 @@ async function checkProxyStatus() {
         });
         
         if (response.ok) {
-            statusDot.className = 'status-dot online';
-            statusText.textContent = 'Proxy is online';
-            retryBtn.classList.add('hidden');
             state.proxyStatus.isOnline = true;
+            // Remove overlay after successful check
+            document.body.removeChild(overlay);
         } else {
             throw new Error('Proxy test failed');
         }
     } catch (error) {
-        statusDot.className = 'status-dot offline';
-        statusText.textContent = 'Proxy is offline';
-        retryBtn.classList.remove('hidden');
-        state.proxyStatus.isOnline = false;
-    } finally {
-        state.proxyStatus.lastChecked = Date.now();
-        state.proxyStatus.isChecking = false;
+        console.error('Proxy check failed:', error);
+        // Retry after 12 seconds
+        setTimeout(() => checkProxyStatus(overlay), 12000);
     }
 }
 
