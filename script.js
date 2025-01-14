@@ -4,6 +4,7 @@ const state = {
     currentSearch: null,
     isLoading: false,
     errorTracker: new Map(), // Track errors by episode number
+    downloadLinks: [], // Store the most recent episode links
 };
 
 // DOM Elements
@@ -459,6 +460,7 @@ async function handleFetchDownloadLinks(mode) {
     state.errorTracker.clear(); // Clear error tracker
     DOM.episodeList.innerHTML = '';
     DOM.episodeList.classList.add('hidden');
+    state.downloadLinks = []; // Clear previous links
 
     const startEpisode = parseInt(DOM.startEpisode.value);
     const endEpisode = parseInt(DOM.endEpisode.value);
@@ -495,12 +497,21 @@ async function handleFetchDownloadLinks(mode) {
 // Add new function to handle multi-download
 function handleMultiDownload(episodeOptions) {
     let successCount = 0;
+    const successfulLinks = [];
+    
     episodeOptions.forEach(episode => {
         if (episode.downloadLink) {
             window.open(episode.downloadLink, '_blank');
             successCount++;
+            successfulLinks.push({
+                title: episode.title,
+                downloadLink: episode.downloadLink
+            });
         }
     });
+
+    // Store the links in state for copy/export operations
+    state.downloadLinks = successfulLinks;
 
     // Show success message with count
     const episodeList = document.getElementById('episodeList');
@@ -807,18 +818,38 @@ async function changeUrlFormat(animeUrl, startEpisode, endEpisode) {
 
 // Simplify handleExportLinks function
 async function handleExportLinks() {
+    // Check if we have links either in the episode list or state
     const episodeList = document.getElementById('episodeList');
-    if (!episodeList.children.length) {
+    const hasVisibleLinks = episodeList.children.length > 0 && 
+                           !episodeList.querySelector('.success-message');
+    
+    if (!hasVisibleLinks && !state.downloadLinks.length) {
         showError('Please fetch episode links first before exporting.');
         return;
     }
 
     let content = '';
-    const episodes = Array.from(episodeList.getElementsByClassName('episode-item'));
-    episodes.forEach(episode => {
-        const link = episode.querySelector('a').href;
-        content += `${link}\n`;
-    });
+    
+    if (hasVisibleLinks) {
+        // Get links from the visible episode list
+        const episodes = Array.from(episodeList.getElementsByClassName('episode-item'));
+        episodes.forEach(episode => {
+            const link = episode.querySelector('a').href;
+            if (!link.includes('javascript:void(0)')) {
+                content += `${link}\n`;
+            }
+        });
+    } else {
+        // Get links from state
+        state.downloadLinks.forEach(episode => {
+            content += `${episode.downloadLink}\n`;
+        });
+    }
+
+    if (!content) {
+        showError('No valid links to export.');
+        return;
+    }
 
     // Create and trigger download
     const blob = new Blob([content], { type: 'text/plain' });
@@ -834,18 +865,38 @@ async function handleExportLinks() {
 
 // Add new function to handle copying links
 async function handleCopyLinks() {
+    // Check if we have links either in the episode list or state
     const episodeList = document.getElementById('episodeList');
-    if (!episodeList.children.length) {
+    const hasVisibleLinks = episodeList.children.length > 0 && 
+                           !episodeList.querySelector('.success-message');
+    
+    if (!hasVisibleLinks && !state.downloadLinks.length) {
         showError('Please fetch episode links first before copying.');
         return;
     }
 
     let content = '';
-    const episodes = Array.from(episodeList.getElementsByClassName('episode-item'));
-    episodes.forEach(episode => {
-        const link = episode.querySelector('a').href;
-        content += `${link}\n`;
-    });
+    
+    if (hasVisibleLinks) {
+        // Get links from the visible episode list
+        const episodes = Array.from(episodeList.getElementsByClassName('episode-item'));
+        episodes.forEach(episode => {
+            const link = episode.querySelector('a').href;
+            if (!link.includes('javascript:void(0)')) {
+                content += `${link}\n`;
+            }
+        });
+    } else {
+        // Get links from state
+        state.downloadLinks.forEach(episode => {
+            content += `${episode.downloadLink}\n`;
+        });
+    }
+
+    if (!content) {
+        showError('No valid links to copy.');
+        return;
+    }
 
     try {
         await navigator.clipboard.writeText(content);
