@@ -2,7 +2,8 @@
 const state = {
     selectedAnimeUrl: '',
     currentSearch: null,
-    isLoading: false
+    isLoading: false,
+    errorTracker: new Map(), // Track errors by episode number
 };
 
 // DOM Elements
@@ -455,6 +456,7 @@ function validateEpisodeNumbers(startEpisode, endEpisode) {
 async function handleFetchDownloadLinks(mode) {
     // Clear previous errors and episode list
     DOM.errorContainer.innerHTML = '';
+    state.errorTracker.clear(); // Clear error tracker
     DOM.episodeList.innerHTML = '';
     DOM.episodeList.classList.add('hidden');
 
@@ -511,12 +513,39 @@ function handleMultiDownload(episodeOptions) {
     episodeList.classList.remove('hidden');
 }
 
-function showError(message) {
+function showError(message, episodeNum = null) {
     const errorContainer = document.getElementById('errorContainer');
-    const errorItem = document.createElement('div');
-    errorItem.classList.add('error-item');
-    errorItem.textContent = message;
-    errorContainer.appendChild(errorItem);
+    
+    // If episode number is provided, handle as episode-specific error
+    if (episodeNum !== null) {
+        // Remove existing error for this episode if any
+        const existingError = state.errorTracker.get(episodeNum);
+        if (existingError) {
+            errorContainer.removeChild(existingError);
+        }
+        
+        const errorItem = document.createElement('div');
+        errorItem.classList.add('error-item');
+        errorItem.textContent = `Episode ${episodeNum}: ${message}`;
+        errorContainer.appendChild(errorItem);
+        
+        // Update tracker
+        state.errorTracker.set(episodeNum, errorItem);
+        
+        // Remove error after 5 seconds
+        setTimeout(() => {
+            if (errorContainer.contains(errorItem)) {
+                errorContainer.removeChild(errorItem);
+                state.errorTracker.delete(episodeNum);
+            }
+        }, 5000);
+    } else {
+        // Handle general errors as before
+        const errorItem = document.createElement('div');
+        errorItem.classList.add('error-item');
+        errorItem.textContent = message;
+        errorContainer.appendChild(errorItem);
+    }
 }
 
 async function fetchDownloadLinks(animeUrl, startEpisode, endEpisode, preferredResolution) {
@@ -605,7 +634,7 @@ async function scrapeEpisodePage(url, episodeTitle, episodeNumber, preferredReso
         }
 
         // Step 3: Fetch the final download links using the extracted `id`
-        const postResponse = await fetch("https://web-production-af65.up.railway.app/https://s3embtaku.pro/download", {
+        const postResponse = await fetch("https://verbose-worried-hibiscus.glitch.me/https://s3embtaku.pro/download", {
             method: "POST",
             headers: {
                 "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
@@ -663,17 +692,77 @@ function displayEpisodeList(episodeOptions) {
     episodeOptions.forEach(episode => {
         const episodeItem = document.createElement('div');
         episodeItem.classList.add('episode-item');
-        episodeItem.innerHTML = `
-            <a href="${episode.downloadLink}" target="_blank">
-                ${episode.title}
-                <span class="episode-resolution">- Resolution: ${episode.resolution || 'Unknown'}</span>
-            </a>
-        `;
+        
+        if (!episode.downloadLink) {
+            episodeItem.classList.add('not-downloadable');
+            episodeItem.innerHTML = `
+                <a href="javascript:void(0)">
+                    ${episode.title}
+                    <span class="episode-resolution">Unable to fetch download link
+                        <button class="retry-button" data-episode="${episode.episodeNumber}">Retry</button>
+                    </span>
+                </a>
+            `;
+
+            // Add retry functionality
+            const retryButton = episodeItem.querySelector('.retry-button');
+            retryButton.addEventListener('click', async (e) => {
+                e.stopPropagation();
+                const episodeNum = parseInt(retryButton.dataset.episode);
+                const resolution = document.getElementById('resolution').value + 'P';
+                
+                // Show loading state
+                retryButton.textContent = 'Retrying...';
+                retryButton.disabled = true;
+
+                try {
+                    const newEpisodeData = await scrapeEpisodePage(
+                        episode.url,
+                        episode.title,
+                        episodeNum,
+                        resolution
+                    );
+
+                    if (newEpisodeData.downloadLink) {
+                        // Remove any existing error for this episode
+                        const existingError = state.errorTracker.get(episodeNum);
+                        if (existingError) {
+                            DOM.errorContainer.removeChild(existingError);
+                            state.errorTracker.delete(episodeNum);
+                        }
+
+                        // Update the episode item with the new link
+                        episodeItem.classList.remove('not-downloadable');
+                        episodeItem.innerHTML = `
+                            <a href="${newEpisodeData.downloadLink}" target="_blank">
+                                ${newEpisodeData.title}
+                                <span class="episode-resolution">- Resolution: ${newEpisodeData.resolution || 'Unknown'}</span>
+                            </a>
+                        `;
+                    } else {
+                        throw new Error('Unable to fetch download link');
+                    }
+                } catch (error) {
+                    retryButton.textContent = 'Retry';
+                    retryButton.disabled = false;
+                    showError('Failed to fetch download link', episodeNum);
+                }
+            });
+        } else {
+            episodeItem.innerHTML = `
+                <a href="${episode.downloadLink}" target="_blank">
+                    ${episode.title}
+                    <span class="episode-resolution">- Resolution: ${episode.resolution || 'Unknown'}</span>
+                </a>
+            `;
+            episodeItem.addEventListener('click', function() {
+                episodeItem.classList.add('clicked');
+            });
+        }
+        
         fragment.appendChild(episodeItem);
-        episodeItem.addEventListener('click', function () {
-            episodeItem.classList.add('clicked');
-        });
     });
+
     episodeListContainer.appendChild(fragment);
     episodeListContainer.classList.remove('hidden');
 }
