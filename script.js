@@ -5,6 +5,12 @@ const state = {
     isLoading: false,
     errorTracker: new Map(), // Track errors by episode number
     downloadLinks: [], // Store the most recent episode links
+    currentProxy: 'https://verbose-worried-hibiscus.glitch.me/',
+    proxyStatus: {
+        isChecking: false,
+        isOnline: false,
+        lastChecked: null
+    }
 };
 
 // DOM Elements
@@ -24,6 +30,7 @@ const DOM = {
         this.startEpisode = document.getElementById('startEpisode');
         this.endEpisode = document.getElementById('endEpisode');
         this.resolution = document.getElementById('resolution');
+        this.proxyStatusIndicator = document.getElementById('proxyStatusIndicator');
     }
 };
 
@@ -148,6 +155,7 @@ document.addEventListener('DOMContentLoaded', () => {
     DOM.init();
     initializeUI();
     setupEventListeners();
+    setupProxyStatus();
 });
 
 function initializeUI() {
@@ -181,6 +189,69 @@ function setupEventListeners() {
     DOM.form.addEventListener('submit', (e) => {
         e.preventDefault();
     });
+}
+
+function setupProxyStatus() {
+    const proxyContainer = document.createElement('div');
+    proxyContainer.classList.add('proxy-status-container');
+    proxyContainer.innerHTML = `
+        <div id="proxyStatusIndicator" class="proxy-status">
+            <span class="status-dot"></span>
+            <span class="status-text">Checking proxy status...</span>
+            <button class="retry-proxy-btn hidden">Retry</button>
+        </div>
+    `;
+
+    // Insert before the search form
+    const searchForm = document.getElementById('animeForm');
+    searchForm.parentNode.insertBefore(proxyContainer, searchForm);
+
+    // Add retry button handler
+    const retryBtn = proxyContainer.querySelector('.retry-proxy-btn');
+    retryBtn.addEventListener('click', () => {
+        retryBtn.classList.add('hidden');
+        checkProxyStatus();
+    });
+
+    // Initial check only
+    checkProxyStatus();
+}
+
+async function checkProxyStatus() {
+    const statusDot = document.querySelector('.status-dot');
+    const statusText = document.querySelector('.status-text');
+    const retryBtn = document.querySelector('.retry-proxy-btn');
+
+    if (state.proxyStatus.isChecking) return;
+    state.proxyStatus.isChecking = true;
+
+    statusDot.className = 'status-dot checking';
+    statusText.textContent = 'Checking proxy status...';
+    
+    try {
+        const testUrl = 'https://s3embtaku.pro/download';
+        const response = await fetch(state.currentProxy + testUrl, { 
+            method: 'HEAD',
+            timeout: 5000
+        });
+        
+        if (response.ok) {
+            statusDot.className = 'status-dot online';
+            statusText.textContent = 'Proxy is online';
+            retryBtn.classList.add('hidden');
+            state.proxyStatus.isOnline = true;
+        } else {
+            throw new Error('Proxy test failed');
+        }
+    } catch (error) {
+        statusDot.className = 'status-dot offline';
+        statusText.textContent = 'Proxy is offline';
+        retryBtn.classList.remove('hidden');
+        state.proxyStatus.isOnline = false;
+    } finally {
+        state.proxyStatus.lastChecked = Date.now();
+        state.proxyStatus.isChecking = false;
+    }
 }
 
 async function handleSearch() {
@@ -624,6 +695,11 @@ function updateProgressBar(fetchedEpisodes, totalEpisodes) {
 }
 
 async function scrapeEpisodePage(url, episodeTitle, episodeNumber, preferredResolution) {
+    if (!state.proxyStatus.isOnline) {
+        showError('Proxy server is currently offline. Please check proxy status and try again.', episodeNumber);
+        return { title: episodeTitle, downloadLink: null, episodeNumber };
+    }
+    
     try {
         // Step 1: Fetch the initial download page link
         const response = await fetch(url);
@@ -645,7 +721,7 @@ async function scrapeEpisodePage(url, episodeTitle, episodeNumber, preferredReso
         }
 
         // Step 3: Fetch the final download links using the extracted `id`
-        const postResponse = await fetch("https://verbose-worried-hibiscus.glitch.me/https://s3embtaku.pro/download", {
+        const postResponse = await fetch(state.currentProxy + "https://s3embtaku.pro/download", {
             method: "POST",
             headers: {
                 "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
@@ -691,6 +767,10 @@ async function scrapeEpisodePage(url, episodeTitle, episodeNumber, preferredReso
         };
 
     } catch (error) {
+        // Add proxy-specific error handling
+        if (error.message.includes('Failed to fetch') || error.message.includes('NetworkError')) {
+            showError('Proxy server may be offline.', episodeNumber);
+        }
         return { title: episodeTitle, downloadLink: null, episodeNumber };
     }
 }

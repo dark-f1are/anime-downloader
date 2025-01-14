@@ -651,3 +651,63 @@ option {
         grid-template-columns: 1fr;
     }
 }
+
+/* Add these new styles */
+.proxy-status-container {
+    margin-bottom: var(--spacing-lg);
+    padding: var(--spacing-md);
+    border-radius: var(--border-radius-sm);
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.proxy-status {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-md);
+}
+
+.status-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    transition: background-color 0.3s ease;
+}
+
+.status-dot.checking {
+    background-color: #fbbf24;
+    animation: pulse 1.5s infinite;
+}
+
+.status-dot.online {
+    background-color: #22c55e;
+}
+
+.status-dot.offline {
+    background-color: #ef4444;
+}
+
+.status-text {
+    font-size: 14px;
+    color: var(--text-color);
+}
+
+.retry-proxy-btn {
+    padding: 4px 8px;
+    font-size: 12px;
+    background: var(--btn-bg-color);
+    border: none;
+    border-radius: var(--border-radius-sm);
+    color: white;
+    cursor: pointer;
+    transition: opacity 0.3s;
+}
+
+.retry-proxy-btn:hover {
+    opacity: 0.9;
+}
+
+@keyframes pulse {
+    0% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(1.2); opacity: 0.7; }
+    100% { transform: scale(1); opacity: 1; }
+}
