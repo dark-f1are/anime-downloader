@@ -1,72 +1,89 @@
 # Anime Downloader 🎬
 
-A modern web application for searching and downloading anime episodes. Features a clean dark theme interface and supports multiple video resolutions.
+A modern web application for searching and downloading anime episodes with a clean, responsive UI and comprehensive error handling.
 
 ## ✨ Key Features
 
-- 🔍 Quick anime search with button trigger
-- 🖼️ Rich anime details with cover images
-- 📺 Episode range selection
-- 🎥 Multiple resolution options (1080p to 360p)
-- 📋 Copy all download links to clipboard
-- 📥 Batch download capability
-- 📁 Export links to text file
-- 🌗 Dark theme UI
-- 📱 Responsive design
-- 🔄 Progress tracking for downloads
-- ⚡ Concurrent request handling
+- 🎯 Smart search with instant results
+- 🌐 Proxy support for reliable downloads
+- 📺 Multiple resolution options (1080p, 720p, 480p, 360p)
+- 💾 Download options:
+  - Individual episode downloads
+  - Batch download capability
+  - Copy links to clipboard
+  - Export links to text file
+- 🔄 Progress tracking with visual feedback
+- 🔁 Automatic retry mechanism for failed downloads
+- 📱 Fully responsive design
+- 🌙 Dark theme UI with glass morphism effects
+- 💨 Cache system for faster repeated searches
+- ⚡ Concurrent downloads for better performance
+
+## 🚀 Technical Features
+
+- 🛠️ Vanilla JavaScript with modern ES6+ features
+- 🎨 CSS Variables for easy theming
+- 🔋 Local storage caching
+- 🌐 CORS-aware proxy implementation
+- 🔄 Async/await for clean asynchronous code
+- 🎯 Rate limiting and request queuing
+- 🎭 Error boundary and comprehensive error handling
+- 📱 Mobile-first responsive design
+- 🔍 Smart search with debouncing
+- 💾 Efficient state management
 
 ## 🎮 Usage Guide
 
 1. **Search for Anime**
-   - Type the anime title in the search box
-   - Click the search button or press Enter
-   - Click on a result to select the anime
+   - Enter the anime title in the search box
+   - Select from search results with cover images
+   - View detailed anime information
 
 2. **Configure Download**
-   - Set the episode range (start and end)
-   - Choose your preferred video quality
-   - Select one of the following options:
-     - "Get Links" for individual episode links
-     - "Download All" for batch downloading
-     - "Copy Links" to copy all links to clipboard
-     - "Export Links" to save links to a text file
+   - Set episode range (start & end)
+   - Choose preferred resolution
+   - Select download method:
+     - `Get Links`: View individual episode links
+     - `Download All`: Start batch download
+     - `Copy Links`: Copy to clipboard
+     - `Export Links`: Save as text file
 
-3. **Download Options**
-   - Individual episodes: Click on episode links
-   - Batch download: Links open in new tabs automatically
-   - Copy links: Paste links into external downloader
-   - Export: Use the text file with download managers
+3. **Download Management**
+   - Track download progress with visual indicator
+   - Retry failed downloads individually
+   - View resolution availability for each episode
+   - Monitor proxy server status
 
-## 🛠️ Technical Details
+## 🛡️ Error Handling
 
-- Built with vanilla JavaScript - no frameworks
-- Uses modern ES6+ features
-- Implements efficient request handling
-- Includes error handling and user feedback
-- Responsive CSS with CSS variables
-- Cross-browser compatible
+- Comprehensive error tracking per episode
+- Visual feedback for failed downloads
+- Automatic retry mechanism
+- Proxy status monitoring
+- Network error recovery
+- Invalid input validation
+
+## 📱 Responsive Design
+
+- Adapts to all screen sizes
+- Mobile-optimized interface
+- Touch-friendly controls
+- Optimized layouts for tablets
+- Performance considerations for mobile devices
+
+## 💾 Caching System
+
+- Search results caching
+- Download links caching
+- Cache expiration management
+- Storage optimization
+- Automatic cache cleanup
 
 ## ⚠️ Important Notice
 
 **Note:** Episodes of any anime released after **November 24, 2024** will not be available for download through this tool. Please check for updates or alternative sources for newer episodes.
 
-## ⚠️ Notes
-
-- Requires a modern browser with JavaScript enabled
-- Some features may require CORS handling
-- Downloads depend on server availability
-- For personal use only - respect copyright laws
-
 ## ❓ FAQ
-
-### General Questions
-
-**Q: Is this tool free to use?**
-A: Yes, the tool is completely free and open source.
-
-**Q: Do I need to install anything?**
-A: No, this is a web-based tool that runs directly in your browser.
 
 ### Technical Questions
 
@@ -92,12 +109,6 @@ A: The tool works best with:
 - Microsoft Edge
 - Safari (latest versions)
 
-**Q: Why do I need to select resolution?**
-A: Different resolutions offer a balance between video quality and file size:
-- 1080p: Best quality, larger file size
-- 720p: Good quality, moderate file size
-- 480p/360p: Smaller file size, lower quality
-
 ### Usage Questions
 
 **Q: Can I download multiple episodes at once?**
@@ -114,13 +125,13 @@ A: You can:
 **Q: Is there a limit to how many episodes I can download?**
 A: While there's no hard limit, we recommend downloading in smaller batches (10-20 episodes) for better reliability.
 
-## 🤝 Contributing
+## ⚠️ Important Notes
 
-1. Fork the repository
-2. Create your feature branch
-3. Commit your changes
-4. Push to the branch
-5. Open a Pull Request
+- Requires modern browser with JavaScript enabled
+- Some features need popup permissions
+- Download speed depends on network connection
+- Proxy server availability affects functionality
+- Mobile browsers may limit concurrent downloads
 
 ## 👤 Author
 
