@@ -215,7 +215,7 @@ function setupProxyStatus() {
 
 async function checkProxyStatus(overlay) {
     try {
-        const testUrl = 'https://s3embtaku.pro/download';
+        const testUrl = 'https://anitaku.bz';
         const response = await fetch(state.currentProxy + testUrl, { 
             method: 'HEAD',
             timeout: 5000
