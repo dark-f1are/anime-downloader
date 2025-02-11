@@ -213,7 +213,7 @@ function setupProxyStatus() {
     checkProxyStatus(overlay);
 }
 
-async function checkProxyStatus(overlay, retryCount = 0) {
+async function checkProxyStatus(overlay) {
     try {
         const testUrl = 'https://anitaku.bz';
         const response = await fetch(state.currentProxy + testUrl, { 
@@ -223,100 +223,16 @@ async function checkProxyStatus(overlay, retryCount = 0) {
         
         if (response.ok) {
             state.proxyStatus.isOnline = true;
-            updateProxyStatusIndicator('online');
+            // Remove overlay after successful check
             document.body.removeChild(overlay);
         } else {
-            throw new Error('Anitaku might be down');
+            throw new Error('Proxy test failed');
         }
     } catch (error) {
         console.error('Proxy check failed:', error);
-
-        if (retryCount < 5) {
-            // Retry every 10-15 seconds for the first 5 attempts
-            setTimeout(() => checkProxyStatus(overlay, retryCount + 1), getRandomInt(10000, 15000));
-        } else {
-            // Slow down retries to every 30 seconds after 5 failures
-            setTimeout(() => checkProxyStatus(overlay, retryCount + 1), 30000);
-            
-            if (retryCount === 5) {
-                showError('Proxy might be asleep. Please wait or restart it on Glitch.');
-            }
-        }
-
-        // Update UI based on error type
-        if (error.message.includes('Failed to fetch') || error.message.includes('NetworkError')) {
-            updateProxyStatusIndicator('unreachable');
-        } else {
-            updateProxyStatusIndicator('anitaku-down');
-        }
+        // Retry after 12 seconds
+        setTimeout(() => checkProxyStatus(overlay), 12000);
     }
-}
-
-function updateProxyStatusIndicator(status) {
-    const proxyStatusIndicator = document.getElementById('proxyStatusIndicator');
-    const statusDot = proxyStatusIndicator.querySelector('.status-dot');
-    const statusText = proxyStatusIndicator.querySelector('.status-text');
-
-    if (status === 'online') {
-        statusDot.classList.remove('checking', 'offline');
-        statusDot.classList.add('online');
-        statusText.textContent = 'Proxy is online';
-    } else if (status === 'unreachable') {
-        statusDot.classList.remove('checking', 'online');
-        statusDot.classList.add('offline');
-        statusText.textContent = 'Proxy might be asleep. Please wait or restart it on Glitch.';
-    } else if (status === 'anitaku-down') {
-        statusDot.classList.remove('checking', 'online');
-        statusDot.classList.add('offline');
-        statusText.textContent = 'Anitaku might be down';
-    } else if (status === 'checking') {
-        statusDot.classList.remove('online', 'offline');
-        statusDot.classList.add('checking');
-        statusText.textContent = 'Checking proxy status...';
-    }
-}
-
-function setupProxyStatus() {
-    const overlay = document.createElement('div');
-    overlay.classList.add('proxy-overlay');
-    overlay.innerHTML = `
-        <div class="proxy-checking-message">
-            <div class="proxy-status" id="proxyStatusIndicator">
-                <span class="status-dot checking"></span>
-                <span class="status-text">Initializing proxy server...</span>
-            </div>
-        </div>
-        <div class="bouncing-dots">
-            <div></div>
-            <div></div>
-            <div></div>
-        </div>
-    `;
-    document.body.appendChild(overlay);
-
-    // Initial check
-    updateProxyStatusIndicator('checking');
-    checkProxyStatus(overlay);
-}
-
-function getRandomInt(min, max) {
-    return Math.floor(Math.random() * (max - min + 1)) + min;
-}
-
-// Call setupProxyStatus when the document is loaded
-document.addEventListener('DOMContentLoaded', () => {
-    DOM.init();
-    initializeUI();
-    setupEventListeners();
-    setupProxyStatus();
-});
-
-function showError(message) {
-    const errorContainer = document.getElementById('errorContainer');
-    const errorItem = document.createElement('div');
-    errorItem.classList.add('error-item');
-    errorItem.textContent = message;
-    errorContainer.appendChild(errorItem);
 }
 
 async function handleSearch() {
