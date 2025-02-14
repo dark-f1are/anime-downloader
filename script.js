@@ -215,7 +215,7 @@ function setupProxyStatus() {
 
 async function checkProxyStatus(overlay) {
     try {
-        const testUrl = 'https://anitaku.bz';
+        const testUrl = 'https://ww24.gogoanimes.fi/';
         const response = await fetch(state.currentProxy + testUrl, { 
             method: 'HEAD',
             timeout: 5000
@@ -340,7 +340,7 @@ async function searchAnime(query) {
         return;
     }
 
-    const searchUrl = `https://anitaku.bz/search.html?keyword=${encodeURIComponent(query)}`;
+    const searchUrl = `https://ww24.gogoanimes.fi/search.html?keyword=${encodeURIComponent(query)}`;
     const searchResultsContainer = document.getElementById('searchResults');
 
     searchResultsContainer.innerHTML = `
