@@ -371,7 +371,7 @@ async function searchAnime(query) {
         const results = await Promise.all(Array.from(items).map(async item => {
             const titleElement = item.querySelector('.name a');
             const title = titleElement.textContent.trim();
-            const url = `https://anitaku.bz${titleElement.getAttribute('href')}`;
+            const url = `https://ww24.gogoanimes.fi${titleElement.getAttribute('href')}`;
             const imgSrc = item.querySelector('.img img').getAttribute('src');
             const releasedYear = item.querySelector('.released').textContent.trim();
 
