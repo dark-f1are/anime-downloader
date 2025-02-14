@@ -865,7 +865,7 @@ async function changeUrlFormat(animeUrl, startEpisode, endEpisode) {
         // Build an array of episode URLs and titles
         const episodes = Array.from(episodeElements).map(el => {
             const relativeUrl = el.getAttribute("href").trim();
-            const fullUrl = `https://anitaku.bz${relativeUrl}`; // Ensure the full URL
+            const fullUrl = `https://ww24.gogoanimes.fi${relativeUrl}`; // Ensure the full URL
             const episodeTitle = el.querySelector(".name").textContent.trim();
             const episodeNumber = parseInt(episodeTitle.replace("EP", "").trim(), 10); // Extract episode number
             return { fullUrl, episodeTitle, episodeNumber };
