@@ -215,7 +215,7 @@ function setupProxyStatus() {
 
 async function checkProxyStatus(overlay) {
     try {
-        const testUrl = 'https://ww24.gogoanimes.fi/';
+        const testUrl = 'https://anitaku.bz';
         const response = await fetch(state.currentProxy + testUrl, { 
             method: 'HEAD',
             timeout: 5000
@@ -340,7 +340,7 @@ async function searchAnime(query) {
         return;
     }
 
-    const searchUrl = `https://ww24.gogoanimes.fi/search.html?keyword=${encodeURIComponent(query)}`;
+    const searchUrl = `https://anitaku.bz/search.html?keyword=${encodeURIComponent(query)}`;
     const searchResultsContainer = document.getElementById('searchResults');
 
     searchResultsContainer.innerHTML = `
@@ -371,7 +371,7 @@ async function searchAnime(query) {
         const results = await Promise.all(Array.from(items).map(async item => {
             const titleElement = item.querySelector('.name a');
             const title = titleElement.textContent.trim();
-            const url = `https://ww24.gogoanimes.fi${titleElement.getAttribute('href')}`;
+            const url = `https://anitaku.bz${titleElement.getAttribute('href')}`;
             const imgSrc = item.querySelector('.img img').getAttribute('src');
             const releasedYear = item.querySelector('.released').textContent.trim();
 
@@ -865,7 +865,7 @@ async function changeUrlFormat(animeUrl, startEpisode, endEpisode) {
         // Build an array of episode URLs and titles
         const episodes = Array.from(episodeElements).map(el => {
             const relativeUrl = el.getAttribute("href").trim();
-            const fullUrl = `https://ww24.gogoanimes.fi${relativeUrl}`; // Ensure the full URL
+            const fullUrl = `https://anitaku.bz${relativeUrl}`; // Ensure the full URL
             const episodeTitle = el.querySelector(".name").textContent.trim();
             const episodeNumber = parseInt(episodeTitle.replace("EP", "").trim(), 10); // Extract episode number
             return { fullUrl, episodeTitle, episodeNumber };
